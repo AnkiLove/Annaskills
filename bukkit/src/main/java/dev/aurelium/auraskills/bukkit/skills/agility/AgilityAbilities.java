@@ -15,10 +15,9 @@ import dev.aurelium.auraskills.bukkit.util.AttributeCompat;
 import dev.aurelium.auraskills.bukkit.util.CompatUtil;
 import dev.aurelium.auraskills.bukkit.util.PotionUtil;
 import dev.aurelium.auraskills.common.message.type.AbilityMessage;
-import dev.aurelium.auraskills.common.scheduler.TaskRunnable;
 import dev.aurelium.auraskills.common.user.User;
-import dev.aurelium.auraskills.common.util.text.TextUtil;
 import org.bukkit.Bukkit;
+import dev.aurelium.auraskills.common.util.text.TextUtil;
 import org.bukkit.Material;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
@@ -186,25 +185,7 @@ public class AgilityAbilities extends BukkitAbilityImpl {
     }
 
     public void startFleetingRemoveTimer() {
-        if (plugin.getScheduler().isFolia()) {
-            plugin.getScheduler().timerSync(new TaskRunnable() {
-                @Override
-                public void run() {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        plugin.getScheduler().executeAtEntity(player, (task) -> removeFleeting(player));
-                    }
-                }
-            }, 5, 5, TimeUnit.SECONDS);
-        } else {
-            plugin.getScheduler().timerSync(new TaskRunnable() {
-                @Override
-                public void run() {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        removeFleeting(player);
-                    }
-                }
-            }, 5, 5, TimeUnit.SECONDS);
-        }
+        plugin.getScheduler().timerForEachOnlinePlayer(this::removeFleeting, 5, 5, TimeUnit.SECONDS);
     }
 
     public void removeFleeting(Player player) {
@@ -313,12 +294,19 @@ public class AgilityAbilities extends BukkitAbilityImpl {
             // Get damage values
             double percent = getSecondaryValue(ability, user);
             double thunderFallDamage = (percent / 100) * event.getDamage();
-            // Get entities nearby
+            // Take the nearby snapshot on the player's region, then dispatch damage to each
+            // target's owning entity thread. On a cross-region boundary, omit the attacker
+            // reference because reading the player from the target region is not Folia-safe.
             for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 3, 3, 1)) {
                 if (!(entity instanceof LivingEntity livingEntity) || entity.equals(player)) continue;
 
-                // Damage the entity
-                livingEntity.damage(thunderFallDamage, player);
+                plugin.getScheduler().executeAtEntity(livingEntity, ignored -> {
+                    if (Bukkit.isOwnedByCurrentRegion(player)) {
+                        livingEntity.damage(thunderFallDamage, player);
+                    } else {
+                        livingEntity.damage(thunderFallDamage);
+                    }
+                });
             }
         }
     }

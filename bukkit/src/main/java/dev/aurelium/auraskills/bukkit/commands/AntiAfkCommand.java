@@ -63,7 +63,8 @@ public class AntiAfkCommand extends BaseCommand {
                     List<AntiAfkLog> logs = getMostRecent(loaded, offset, perPage);
 
                     // Send message back on main thread
-                    plugin.getScheduler().executeSync(() -> sendLogsMessage(sender, offlinePlayer, logs, page, perPage, loaded.size()));
+                    plugin.getScheduler().executeAtCommandSender(sender,
+                            () -> sendLogsMessage(sender, offlinePlayer, logs, page, perPage, loaded.size()));
                 });
             } else {
                 List<AntiAfkLog> allLogs = user.getStoredAntiAfkLogs().get();
@@ -80,7 +81,8 @@ public class AntiAfkCommand extends BaseCommand {
                 List<AntiAfkLog> logs = getMostRecent(loaded, offset, perPage);
 
                 // Send message back on main thread
-                plugin.getScheduler().executeSync(() -> sendLogsMessage(sender, offlinePlayer, logs, page, perPage, loaded.size()));
+                plugin.getScheduler().executeAtCommandSender(sender,
+                        () -> sendLogsMessage(sender, offlinePlayer, logs, page, perPage, loaded.size()));
             });
         }
     }

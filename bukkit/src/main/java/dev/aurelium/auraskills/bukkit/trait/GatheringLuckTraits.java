@@ -53,6 +53,10 @@ public class GatheringLuckTraits extends TraitImpl {
     }
 
     public void apply(Trait trait, Block block, Player player, User user, XpSource source, Set<ItemStack> drops) {
+        apply(trait, block.getLocation().add(0.5, 0.5, 0.5), player, user, source, drops);
+    }
+
+    public void apply(Trait trait, Location location, Player player, User user, XpSource source, Set<ItemStack> drops) {
         if (!trait.isEnabled()) return;
         // Get the skill corresponding to the block trait
         Skill skill = getSkill(trait);
@@ -72,8 +76,6 @@ public class GatheringLuckTraits extends TraitImpl {
 
             ItemStack droppedItem = item.clone();
             droppedItem.setAmount(numExtra);
-
-            Location location = block.getLocation().add(0.5, 0.5, 0.5);
 
             boolean toInventory = plugin.getLootManager().toInventory(player.getInventory().getItemInMainHand());
             Cause cause = getCause(skill);
@@ -172,8 +174,16 @@ public class GatheringLuckTraits extends TraitImpl {
     }
 
     public Set<ItemStack> getUniqueDrops(Block block, Player player) {
+        return collectUniqueDrops(block.getDrops(player.getInventory().getItemInMainHand(), player));
+    }
+
+    public Set<ItemStack> getUniqueDrops(Block block, ItemStack tool) {
+        return collectUniqueDrops(block.getDrops(tool));
+    }
+
+    private Set<ItemStack> collectUniqueDrops(Iterable<ItemStack> drops) {
         Set<ItemStack> unique = Sets.newConcurrentHashSet();
-        for (ItemStack item : block.getDrops(player.getInventory().getItemInMainHand(), player)) {
+        for (ItemStack item : drops) {
             // Check if a similar item already exists
             boolean alreadyAdded = false;
             for (ItemStack existing : unique) {

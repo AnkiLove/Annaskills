@@ -9,9 +9,7 @@ import dev.aurelium.auraskills.bukkit.AuraSkills;
 import dev.aurelium.auraskills.bukkit.ability.BukkitAbilityImpl;
 import dev.aurelium.auraskills.bukkit.user.BukkitUser;
 import dev.aurelium.auraskills.bukkit.util.VersionUtils;
-import dev.aurelium.auraskills.common.scheduler.TaskRunnable;
 import dev.aurelium.auraskills.common.user.User;
-import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -91,38 +89,30 @@ public class EnchantingAbilities extends BukkitAbilityImpl {
     private void enchantedStrength() {
         var ability = Abilities.ENCHANTED_STRENGTH;
         String modifierName = "AbilityModifier-EnchantedStrength";
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                if (isDisabled(ability)) return;
+        plugin.getScheduler().timerForEachOnlinePlayer(player -> {
+            if (isDisabled(ability)) return;
+            User user = plugin.getUser(player);
 
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    User user = plugin.getUser(player);
+            ItemStack item = player.getInventory().getItemInMainHand();
+            if (!item.getEnchantments().isEmpty()) {
+                if (failsChecks(player, ability)) return;
 
-                    ItemStack item = player.getInventory().getItemInMainHand();
-                    if (!item.getEnchantments().isEmpty()) {
-                        if (failsChecks(player, ability)) continue;
-
-                        // Apply modifier
-                        double strengthPerType = getValue(ability, user);
-                        int enchantCount = 0;
-                        for (Enchantment enchantment : item.getEnchantments().keySet()) {
-                            if (ability.optionStringList("excluded_enchantments").contains(enchantment.getKey().getKey())) {
-                                continue;
-                            }
-                            enchantCount++;
-                        }
-                        if (enchantCount > 0) {
-                            StatModifier modifier = new StatModifier(modifierName, Stats.STRENGTH, strengthPerType * enchantCount, Operation.ADD);
-                            user.addStatModifier(modifier, false);
-                        }
-                    } else {
-                        user.removeStatModifier(modifierName);
+                double strengthPerType = getValue(ability, user);
+                int enchantCount = 0;
+                for (Enchantment enchantment : item.getEnchantments().keySet()) {
+                    if (ability.optionStringList("excluded_enchantments").contains(enchantment.getKey().getKey())) {
+                        continue;
                     }
+                    enchantCount++;
                 }
+                if (enchantCount > 0) {
+                    StatModifier modifier = new StatModifier(modifierName, Stats.STRENGTH, strengthPerType * enchantCount, Operation.ADD);
+                    user.addStatModifier(modifier, false);
+                }
+            } else {
+                user.removeStatModifier(modifierName);
             }
-        };
-        plugin.getScheduler().timerSync(task, 50, 10 * 50, TimeUnit.MILLISECONDS);
+        }, 50, 10 * 50, TimeUnit.MILLISECONDS);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

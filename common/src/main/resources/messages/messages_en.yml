@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -328,7 +328,7 @@ acf:
     location_please_specify_xyz: "<red>Error: Please specify the coordinates x, y, and z. Example: <yellow>world:x,y,z."
     location_console_not_relative: "<red>Error: Console may not use relative coordinates for location."
 commands:
-  prefix: "<dark_gray>[<aqua>Skills<dark_gray>]<reset> "
+  prefix: "<dark_gray>[<aqua>Annaskills<dark_gray>]<reset> "
   antiafk:
     failed: "<red>{player} failed anti-AFK check {check} <gray>(Count: {count})"
     logs:
@@ -606,7 +606,7 @@ commands:
     reloaded: "<green>Config reloaded!"
     desc: Reloads the config, messages, menus, loot tables, action bars, boss bars, and health and luck stats.
   resethealth:
-    desc: Removes all attribute modifiers by AuraSkills for easy uninstalling. This only works on offline players.
+    desc: Removes all attribute modifiers by Annaskills for easy uninstalling. This only works on offline players.
   save:
     already_saving: "<yellow>Data is already saving!"
     mysql_not_enabled: "<yellow>MySQL was not enabled at server startup, saving to file instead!"
@@ -653,7 +653,7 @@ commands:
     updated: "<green>Leaderboard updated!"
     desc: Updates and sorts the leaderboards.
   version:
-    version: "<white>You are on AuraSkills <aqua>{current_version}<white>. The latest version is <aqua>{latest_version}"
+    version: "<white>You are on Annaskills <aqua>{current_version}<white>. The latest version is <aqua>{latest_version}"
     new_update: "{prefix}<white>New update available! You are on version <aqua>{current_version}<white>, latest version is <aqua>{latest_version}\n{prefix}<white>Download it on Modrinth: <yellow><underlined>{link}"
     desc: Shows the currently installed and latest available version of the plugin.
   xp:

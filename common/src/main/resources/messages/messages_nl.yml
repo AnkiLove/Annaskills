@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -513,7 +513,7 @@ commands:
   updateleaderboards:
     already_updating: "<yellow>Leaderboard is al aan het updaten!"
     updated: "<green>Leaderboard bijgewerkt!"
-  version: "<white>Je bent op Aurelium Skills versie <aqua>{current_version}<white>. De laatste versie is <aqua>{latest_version}"
+  version: "<white>Je bent op Annaskills versie <aqua>{current_version}<white>. De laatste versie is <aqua>{latest_version}"
   xp:
     add: "<gray>Toegevoegd <aqua>{amount} {skill} <gray>XP aan speler <gray>{player}"
     set: "<gray>Stel <aqua>{skill} <gray>XP in voor speler <gray>{player} <gray>naar {amount}"

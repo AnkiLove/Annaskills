@@ -5,9 +5,7 @@ import dev.aurelium.auraskills.bukkit.AuraSkills;
 import dev.aurelium.auraskills.bukkit.util.armor.ArmorEquipEvent;
 import dev.aurelium.auraskills.bukkit.util.armor.ArmorType;
 import dev.aurelium.auraskills.common.config.Option;
-import dev.aurelium.auraskills.common.scheduler.TaskRunnable;
 import dev.aurelium.auraskills.common.user.User;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -51,28 +49,21 @@ public class ArmorModifierListener implements Listener {
 
     // Timer based detection
     private void startTimer() {
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    User user = plugin.getUser(player);
-                    Set<ReloadableIdentifier> toReload = new HashSet<>();
+        plugin.getScheduler().timerForEachOnlinePlayer(player -> {
+            User user = plugin.getUser(player);
+            Set<ReloadableIdentifier> toReload = new HashSet<>();
 
-                    for (ArmorType armorType : ArmorType.values()) { // Go through each armor slot
-                        ItemStack wearing = player.getInventory().getItem(armorType.getEquipmentSlot()); // Get the armor player is currently wearing
-                        if (wearing == null) {
-                            wearing = new ItemStack(Material.AIR);
-                        }
-
-                        toReload.addAll(stateManager.changeItemInSlot(user, player, wearing, armorType.getEquipmentSlot(), false, false, false));
-                    }
-
-                    // Reload after all slots are processed to prevent redundant reloads
-                    stateManager.reloadIdentifiers(user, toReload);
+            for (ArmorType armorType : ArmorType.values()) {
+                ItemStack wearing = player.getInventory().getItem(armorType.getEquipmentSlot());
+                if (wearing == null) {
+                    wearing = new ItemStack(Material.AIR);
                 }
+
+                toReload.addAll(stateManager.changeItemInSlot(user, player, wearing, armorType.getEquipmentSlot(), false, false, false));
             }
-        };
-        plugin.getScheduler().timerSync(task, 0L, plugin.configInt(Option.MODIFIER_ARMOR_TIMER_CHECK_PERIOD) * 50L, TimeUnit.MILLISECONDS);
+
+            stateManager.reloadIdentifiers(user, toReload);
+        }, 0L, plugin.configInt(Option.MODIFIER_ARMOR_TIMER_CHECK_PERIOD) * 50L, TimeUnit.MILLISECONDS);
     }
 
 }

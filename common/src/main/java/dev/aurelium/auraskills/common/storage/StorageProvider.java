@@ -49,7 +49,7 @@ public abstract class StorageProvider {
 
             plugin.getUserManager().addUser(user);
 
-            plugin.getScheduler().executeSync(() -> {
+            plugin.getScheduler().executeAtUser(user, () -> {
                 plugin.getStatManager().recalculateStats(user, false);
                 // Applies user item/armor modifiers for the first time
                 plugin.getModifierManager().applyModifiers(user, false);

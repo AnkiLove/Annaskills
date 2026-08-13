@@ -12,7 +12,6 @@ import dev.aurelium.auraskills.common.util.text.TextUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -98,35 +97,34 @@ public class FarmingAbilities extends BukkitAbilityImpl {
 
         Block block = event.getBlock();
         Location ogLoc = block.getLocation();
+        Material expectedType = event.getNewState().getType();
         int radius = ability.optionInt("radius", 30);
 
-        // Check for players nearby
-        Collection<Entity> entities = block.getWorld().getNearbyEntities(ogLoc, radius, radius, radius);
-        List<Player> playerList = entities.stream().filter(e -> e instanceof Player).map(e -> (Player) e).toList();
-
-        for (Player player : playerList) {
-            handleGrowthAura(player, block, event.getNewState());
-        }
+        // Entity lookups spanning many chunks are not region-safe on Folia. Dispatch the
+        // distance check to every player's own scheduler instead.
+        plugin.getScheduler().forEachOnlinePlayer(
+                player -> handleGrowthAura(player, ogLoc, expectedType, radius));
     }
 
-    private void handleGrowthAura(Player player, Block block, BlockState state) {
+    private void handleGrowthAura(Player player, Location blockLocation, Material expectedType, int radius) {
         var ability = Abilities.GROWTH_AURA;
 
+        if (!player.getWorld().equals(blockLocation.getWorld())) return;
+        if (player.getLocation().distanceSquared(blockLocation) > (double) radius * radius) return;
         if (failsChecks(player, ability)) return;
         User user = plugin.getUser(player);
 
         int extraStages = rollExtraStages(user);
         if (extraStages == 0) return;
 
-        if (state.getBlockData() instanceof Ageable ageable) {
-            // Add growth stages with 1 tick delay
-            plugin.getScheduler().scheduleAtLocation(block.getLocation(), () -> {
-                if (block.getType() != state.getType()) return;
+        plugin.getScheduler().scheduleAtLocation(blockLocation, () -> {
+            Block block = blockLocation.getBlock();
+            if (block.getType() != expectedType) return;
+            if (!(block.getBlockData() instanceof Ageable ageable)) return;
 
-                ageable.setAge(Math.min(ageable.getAge() + extraStages, ageable.getMaximumAge()));
-                block.setBlockData(ageable);
-            }, 50, TimeUnit.MILLISECONDS);
-        }
+            ageable.setAge(Math.min(ageable.getAge() + extraStages, ageable.getMaximumAge()));
+            block.setBlockData(ageable);
+        }, 50, TimeUnit.MILLISECONDS);
     }
 
     private int rollExtraStages(User user) {

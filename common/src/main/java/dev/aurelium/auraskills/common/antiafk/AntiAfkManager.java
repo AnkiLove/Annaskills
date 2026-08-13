@@ -83,13 +83,13 @@ public abstract class AntiAfkManager {
         user.getSessionAntiAfkLogs().add(log);
 
         // Send to online players with notify permission
-        for (User notified : plugin.getUserManager().getOnlineUsers()) {
+        plugin.getScheduler().forEachOnlineUser(notified -> {
             if (!notified.hasPermission("auraskills.antiafk.notify")) {
-                continue;
+                return;
             }
 
             notified.sendMessage(message);
-        }
+        });
     }
 
     public void registerChecks() {

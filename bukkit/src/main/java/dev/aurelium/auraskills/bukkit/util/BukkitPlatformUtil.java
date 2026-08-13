@@ -8,7 +8,6 @@ import net.kyori.adventure.text.minimessage.ParsingException;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,14 +26,6 @@ public class BukkitPlatformUtil implements PlatformUtil {
         input = convertEntityName(input).toUpperCase(Locale.ROOT);
         try {
             EntityType type = EntityType.valueOf(input);
-            // Check if feature flag locked entity is disabled
-            if (VersionUtils.isAtLeastVersion(20) && !VersionUtils.isAtLeastVersion(21, 9)) {
-                for (World world : Bukkit.getWorlds()) {
-                    if (!type.isEnabledByFeature(world)) {
-                        return false;
-                    }
-                }
-            }
             return true;
         } catch (IllegalArgumentException e) {
             return false;

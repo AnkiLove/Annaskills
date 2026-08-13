@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -606,7 +606,7 @@ commands:
     reloaded: "<green>Konfigurace znovu načtena!"
     desc: Znovu načte konfiguraci, zprávy, menu, tabulky kořisti, akční lišty, lišty bossů a statistiky zdraví a štěstí.
   resethealth:
-    desc: Odstraní všechny modifikátory atributů od AuraSkills pro snadnou odinstalaci. Funguje pouze u offline hráčů.
+    desc: Odstraní všechny modifikátory atributů od Annaskills pro snadnou odinstalaci. Funguje pouze u offline hráčů.
   save:
     already_saving: "<yellow>Data jsou již ukládaná!"
     mysql_not_enabled: "<yellow>MySQL nebyl povolen při spuštění serveru, místo toho se ukládá do souboru!"
@@ -653,7 +653,7 @@ commands:
     updated: "<green>Žebříček aktualizován!"
     desc: Aktualizuje a seřadí žebříčky.
   version:
-    version: "<white>Používáš AuraSkills <aqua>{current_version}<white>. Nejnovější verze je <aqua>{latest_version}"
+    version: "<white>Používáš Annaskills <aqua>{current_version}<white>. Nejnovější verze je <aqua>{latest_version}"
     new_update: "{prefix}<white>Je dostupná nová aktualizace! Používáš verzi <aqua>{current_version}<white>, nejnovější verze je <aqua>{latest_version}{prefix}<white>Stáhni si ji na Modrinth: <yellow><underlined>{link}"
     desc: Zobrazí aktuálně nainstalovanou a nejnovější dostupnou verzi pluginu.
   xp:

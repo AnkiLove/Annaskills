@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -606,7 +606,7 @@ commands:
     reloaded: "<green>Konfiguracja przeładowana!"
     desc: Odświeża konfigurację, wiadomości, menu, tablice lootów, paski akcji, paski bossa oraz statystyki zdrowia i szczęścia.
   resethealth:
-    desc: Usuwa wszystkie modyfikatory atrybutów przez AuraSkills w celu łatwego odinstalowania. Działa to tylko na graczy offline.
+    desc: Usuwa wszystkie modyfikatory atrybutów przez Annaskills w celu łatwego odinstalowania. Działa to tylko na graczy offline.
   save:
     already_saving: "<yellow>Dane już się zapisują!"
     mysql_not_enabled: "<yellow>MySQL nie był włączony przy starcie serwera, zapisuję zamiast niego do pliku!"
@@ -653,7 +653,7 @@ commands:
     updated: "<green>Tablica wyników zaktualizowana!"
     desc: Aktualizuje i sortuje tablice wyników.
   version:
-    version: "<white>Jesteś na AuraSkills <aqua>{current_version}<white>. Najnowszą wersją jest <aqua>{latest_version}"
+    version: "<white>Jesteś na Annaskills <aqua>{current_version}<white>. Najnowszą wersją jest <aqua>{latest_version}"
     new_update: "{prefix}<white>Dostępna jest nowa aktualizacja! Jesteś na wersji <aqua>{current_version}<white>, najnowsza wersja to <aqua>{latest_version}\n{prefix}<white>Pobierz ją na Modrinth: <yellow><underlined>{link}"
     desc: Pokazuje aktualnie zainstalowaną i najnowszą dostępną wersję pluginu.
   xp:

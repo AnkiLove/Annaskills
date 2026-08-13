@@ -37,3 +37,7 @@ build.xml
 bukkit/run/
 
 htmlReport/
+
+# Local migration backups and runtime verification servers
+_backups/
+runtime-test/

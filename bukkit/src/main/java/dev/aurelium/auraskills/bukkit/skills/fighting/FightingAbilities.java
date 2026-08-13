@@ -333,7 +333,7 @@ public class FightingAbilities extends BukkitAbilityImpl {
     }
 
     private void scheduleUnready(User user) {
-        plugin.getScheduler().scheduleSync(() -> {
+        plugin.getScheduler().scheduleAtUser(user, () -> {
             user.getMetadata().remove(parryKey);
             user.getMetadata().remove(parryVector);
         }, Abilities.PARRY.optionInt("time_ms", 250), TimeUnit.MILLISECONDS);

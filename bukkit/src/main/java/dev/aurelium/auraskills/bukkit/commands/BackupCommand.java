@@ -37,7 +37,7 @@ public class BackupCommand extends BaseCommand {
         issuer.sendMessage(plugin.getPrefix(locale) + plugin.getMsg(CommandMessage.BACKUP_SAVE_SAVING, locale));
 
         CompletableFuture<File> future = backupProvider.saveBackupAsync(true);
-        future.whenComplete((file, exception) -> plugin.getScheduler().executeSync(() -> {
+        future.whenComplete((file, exception) -> plugin.getScheduler().executeAtCommandSender(issuer.getIssuer(), () -> {
             if (file != null) {
                 MessageBuilder.create(plugin).locale(locale).prefix().message(CommandMessage.BACKUP_SAVE_SAVED,
                         "type", plugin.getStorageProvider().getClass().getSimpleName(),
@@ -88,12 +88,12 @@ public class BackupCommand extends BaseCommand {
         plugin.getBackupProvider().loadBackupAsync(file, () -> {
             long end = System.currentTimeMillis();
 
-            plugin.getScheduler().executeSync(() -> {
+            plugin.getScheduler().executeAtCommandSender(issuer.getIssuer(), () -> {
                 MessageBuilder.create(plugin).locale(locale).prefix().message(CommandMessage.BACKUP_LOAD_LOADED).send(issuer);
                 issuer.sendMessage("Loaded backup in " + (end - start) + "ms");
             });
         }, e -> {
-            plugin.getScheduler().executeSync(() ->
+            plugin.getScheduler().executeAtCommandSender(issuer.getIssuer(), () ->
                     issuer.sendMessage(plugin.getPrefix(locale) + TextUtil.replace(plugin.getMsg(CommandMessage.BACKUP_LOAD_ERROR, locale),
                             "{error}", e.getMessage())));
             e.printStackTrace();

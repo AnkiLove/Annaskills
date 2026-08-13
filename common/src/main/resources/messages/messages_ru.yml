@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -545,7 +545,7 @@ commands:
   updateleaderboards:
     already_updating: "<yellow>Таблица лидеров уже обновляется!"
     updated: "<green>Таблица лидеров обновлена!"
-  version: "<white>Вы используете версию AuraSkills <aqua>{current_version}<white>. Последняя версия <aqua>{latest_version}"
+  version: "<white>Вы используете версию Annaskills <aqua>{current_version}<white>. Последняя версия <aqua>{latest_version}"
   xp:
     add: "<gray>Добавлены <aqua>{amount} {skill} <gray>XP игроку <gray>{player}"
     set: "<gray>Установить <aqua>{skill} <gray>XP для игрока <gray>{player} <gray>на {amount}"

@@ -37,7 +37,7 @@ public class PlayerJoinQuit implements Listener {
                     loadUserAsync(player);
                 } else {
                     // Delay loading
-                    plugin.getScheduler().scheduleSync(() -> loadUserAsync(player), loadDelay * 50L, TimeUnit.MILLISECONDS);
+                    plugin.getScheduler().scheduleAtEntity(player, () -> loadUserAsync(player), loadDelay * 50L, TimeUnit.MILLISECONDS);
                 }
             }
         } else { // Yaml storage
@@ -98,7 +98,7 @@ public class PlayerJoinQuit implements Listener {
 
     private void sendUpdateMessage(Player player) {
         // Use a delayed task to give time for permission plugins to load data
-        plugin.getScheduler().scheduleSync(() -> {
+        plugin.getScheduler().scheduleAtEntity(player, () -> {
             if (!plugin.configBoolean(Option.CHECK_FOR_UPDATES)) {
                 return;
             }

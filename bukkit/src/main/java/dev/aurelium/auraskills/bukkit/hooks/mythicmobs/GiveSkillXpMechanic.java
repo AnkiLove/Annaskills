@@ -35,7 +35,7 @@ public class GiveSkillXpMechanic implements ITargetedEntitySkill {
         Player player = BukkitAdapter.adapt(target.asPlayer());
         User user = plugin.getUser(player);
 
-        plugin.getScheduler().executeSync(() -> plugin.getLevelManager().addXp(user, skill, null, xp.get(data)));
+        plugin.getScheduler().executeAtEntity(player, ignored -> plugin.getLevelManager().addXp(user, skill, null, xp.get(data)));
 
         return SkillResult.SUCCESS;
     }

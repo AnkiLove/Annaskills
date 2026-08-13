@@ -15,7 +15,6 @@ import dev.aurelium.auraskills.paper.util.AdventureUtil;
 import dev.aurelium.slate.text.TextFormatter;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,6 +22,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -124,17 +125,15 @@ public class BossBarManager implements Listener {
             colors.put(skill, color);
             overlays.put(skill, overlay);
         }
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            for (Map.Entry<UUID, BossBar> entry : singleBossBars.entrySet()) {
-                AdventureUtil.hideBossBar(player, entry.getValue(), plugin.getAudiences());
-            }
-            for (Map.Entry<UUID, Map<Skill, BossBar>> entry : bossBars.entrySet()) {
-                Map<Skill, BossBar> bossBars = entry.getValue();
-                for (Map.Entry<Skill, BossBar> bossBarEntry : bossBars.entrySet()) {
-                    AdventureUtil.hideBossBar(player, bossBarEntry.getValue(), plugin.getAudiences());
-                }
-            }
+        List<BossBar> activeBars = new ArrayList<>(singleBossBars.values());
+        for (Map<Skill, BossBar> barsBySkill : bossBars.values()) {
+            activeBars.addAll(barsBySkill.values());
         }
+        plugin.getScheduler().forEachOnlinePlayer(player -> {
+            for (BossBar bossBar : activeBars) {
+                AdventureUtil.hideBossBar(player, bossBar, plugin.getAudiences());
+            }
+        });
         bossBars.clear();
         singleBossBars.clear();
     }
@@ -187,7 +186,7 @@ public class BossBarManager implements Listener {
         } else {
             currentActions.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).compute(skill, (sk, num) -> (num == null) ? 0 : num + 1);
         }
-        scheduleHide(playerId, skill, bossBar); // Schedule tasks to hide the boss bar
+        scheduleHide(player, skill, bossBar); // Schedule tasks to hide the boss bar
     }
 
     private BossBar handleNewBossBar(Player player, Skill skill, float progressOld, float progressNew, String text) {
@@ -288,10 +287,11 @@ public class BossBarManager implements Listener {
         }
     }
 
-    private void scheduleHide(UUID playerId, Skill skill, BossBar bossBar) {
+    private void scheduleHide(Player player, Skill skill, BossBar bossBar) {
+        UUID playerId = player.getUniqueId();
         if (mode.equals("single")) {
             final int currentAction = singleCurrentActions.get(playerId);
-            plugin.getScheduler().scheduleSync(() -> {
+            plugin.getScheduler().scheduleAtEntity(player, () -> {
                 if (!mode.equals("single")) {
                     return;
                 }
@@ -299,10 +299,7 @@ public class BossBarManager implements Listener {
                     return;
                 }
                 if (bossBar != null) {
-                    Player player = Bukkit.getPlayer(playerId);
-                    if (player != null) {
-                        AdventureUtil.hideBossBar(player, bossBar, plugin.getAudiences());
-                    }
+                    AdventureUtil.hideBossBar(player, bossBar, plugin.getAudiences());
                 }
                 singleCheckCurrentActions.remove(playerId);
             }, stayTime * 50L, TimeUnit.MILLISECONDS);
@@ -313,7 +310,7 @@ public class BossBarManager implements Listener {
             }
             final int currentAction = multiCurrentActions.get(skill);
 
-            plugin.getScheduler().scheduleSync(() -> {
+            plugin.getScheduler().scheduleAtEntity(player, () -> {
                 if (mode.equals("single")) {
                     return;
                 }
@@ -325,10 +322,7 @@ public class BossBarManager implements Listener {
                     return;
                 }
                 if (bossBar != null) {
-                    Player player = Bukkit.getPlayer(playerId);
-                    if (player != null) {
-                        AdventureUtil.hideBossBar(player, bossBar, plugin.getAudiences());
-                    }
+                    AdventureUtil.hideBossBar(player, bossBar, plugin.getAudiences());
                 }
                 checkCurrentActions.remove(playerId);
             }, stayTime * 50L, TimeUnit.MILLISECONDS);

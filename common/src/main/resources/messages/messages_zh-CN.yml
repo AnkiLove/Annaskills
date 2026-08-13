@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -328,7 +328,7 @@ acf:
     location_please_specify_xyz: "<red>错误: 请指定一个坐标。示例: <yellow>world:x,y,z"
     location_console_not_relative: "<red>错误: 控制台不能使用相对坐标来确定位置。"
 commands:
-  prefix: "<dark_gray>[<aqua>技能插件<dark_gray>] "
+  prefix: "<dark_gray>[<aqua>Annaskills<dark_gray>] "
   antiafk:
     failed: "<red>{player} 未能通过反挂机检查 {check} <gray>(计数: {count})"
     logs:
@@ -606,7 +606,7 @@ commands:
     reloaded: "<green>配置已重载！"
     desc: 重载配置、消息、菜单、战利品表、ActionBar 消息、BossBar 消息及生命与幸运属性。
   resethealth:
-    desc: 移除 AuraSkills 添加的所有属性修饰符便于卸载插件。仅对离线玩家生效。
+    desc: 移除 Annaskills 添加的所有属性修饰符便于卸载插件。仅对离线玩家生效。
   save:
     already_saving: "<yellow>数据已正在保存!"
     mysql_not_enabled: "<yellow>数据库保存在服务器开启时未开启, 已将存储方式改为本地存储!"
@@ -653,7 +653,7 @@ commands:
     updated: "<green>排行榜更新成功!"
     desc: 刷新并整理排行榜。
   version:
-    version: "<white>你使用的 AuraSkills 版本为 <aqua>{current_version}<white>。最新版本是 <aqua>{latest_version}"
+    version: "<white>你使用的 Annaskills 版本为 <aqua>{current_version}<white>。最新版本是 <aqua>{latest_version}"
     new_update: "{prefix}<white>有新版本可用！你使用的版本为 <aqua>{current_version}<white>，最新版本为 <aqua>{latest_version} {prefix}<white>，可在 Modrinth 下载：\n<yellow><underlined>{link}"
     desc: 显示插件版本并检查可用的最新版本。
   xp:

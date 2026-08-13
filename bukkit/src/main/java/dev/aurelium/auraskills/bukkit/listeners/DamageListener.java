@@ -65,7 +65,7 @@ public class DamageListener implements Listener {
             event.setDamage(result.damage());
             // Correct last damage to fix repeated attacks that bypass the invulnerable frame
             if (event.getEntity() instanceof Player damaged && plugin.configBoolean(Option.DAMAGE_CORRECT_LAST_DAMAGE)) {
-                plugin.getScheduler().executeSync(() -> {
+                plugin.getScheduler().executeAtEntity(damaged, ignored -> {
                     User user = plugin.getUser(damaged);
                     double lastDamage = Math.max(event.getFinalDamage(), user.getCurrentOriginalDamage());
                     damaged.setLastDamage(lastDamage);

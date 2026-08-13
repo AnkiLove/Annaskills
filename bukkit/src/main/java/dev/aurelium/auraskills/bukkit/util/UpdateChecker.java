@@ -1,6 +1,5 @@
 package dev.aurelium.auraskills.bukkit.util;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -21,30 +20,26 @@ import java.util.function.BiConsumer;
 
 public class UpdateChecker {
 
-    public static final String MODRINTH_ID = "uDdZAVls";
+    public static final String GITHUB_REPOSITORY = "AnkiLove/Annaskills";
 
     private final AuraSkills plugin;
-    private final String projectId;
-
     public UpdateChecker(AuraSkills plugin) {
         this.plugin = plugin;
-        this.projectId = MODRINTH_ID;
     }
 
     public void sendUpdateMessageAsync(CommandSender sender) {
         getVersion((versionOpt, idOpt) -> versionOpt.ifPresent(version -> idOpt.ifPresent(id -> {
             if (isOutdated(plugin.getDescription().getVersion(), version)) {
-                final String prefix = sender instanceof Player ? plugin.getPrefix(plugin.getDefaultLanguage()) : "[AuraSkills] ";
-                final String downloadLink = "https://modrinth.com/plugin/" + UpdateChecker.MODRINTH_ID + "/version/" + id;
+                final String prefix = sender instanceof Player ? plugin.getPrefix(plugin.getDefaultLanguage()) : "[Annaskills] ";
 
                 String msg = TextUtil.replace(plugin.getMsg(CommandMessage.VERSION_NEW_UPDATE, plugin.getLocale(sender)),
                         "{current_version}", plugin.getDescription().getVersion(),
                         "{latest_version}", version,
-                        "{link}", downloadLink,
+                        "{link}", id,
                         "{prefix}", prefix);
 
                 if (!msg.isEmpty()) {
-                    sender.sendMessage(msg);
+                    plugin.getScheduler().executeAtCommandSender(sender, () -> sender.sendMessage(msg));
                 }
             }
         })));
@@ -53,23 +48,13 @@ public class UpdateChecker {
     // Consumer accepts versionNumber and versionId
     public void getVersion(final BiConsumer<Optional<String>, Optional<String>> consumer) {
         plugin.getScheduler().executeAsync(() -> {
-            String loader;
-            String serverName = Bukkit.getServer().getName();
-            if (serverName.equalsIgnoreCase("CraftBukkit") || serverName.equalsIgnoreCase("Spigot")) {
-                loader = "spigot";
-            } else {
-                loader = "paper";
-            }
-
-            final String baseUrl = "https://api.modrinth.com/v2/project/" + projectId + "/version";
-
-            final String gameVersion = VersionUtils.getVersionString(Bukkit.getBukkitVersion());
-            final String query = "loaders=%5B%22" + loader + "%22%5D&game_versions=%5B%22" + gameVersion + "%22%5D";
-            final String url = baseUrl + "?" + query;
+            final String url = "https://api.github.com/repos/" + GITHUB_REPOSITORY + "/releases/latest";
             try (HttpClient client = HttpClient.newHttpClient()) {
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(url))
+                        .header("Accept", "application/vnd.github+json")
+                        .header("User-Agent", "Annaskills-UpdateChecker")
                         .GET()
                         .build();
 
@@ -82,43 +67,22 @@ public class UpdateChecker {
                         return;
                     }
 
-                    // Parse the JSON response using Gson
-                    JsonArray jsonArray = JsonParser.parseString(responseBody).getAsJsonArray();
-                    if (jsonArray.isEmpty()) {
-                        acceptEmpty(consumer);
-                        return;
-                    }
-
-                    JsonObject firstRelease = null;
-                    for (int i = 0; i < jsonArray.size(); i++) {
-                        JsonObject versionObj = jsonArray.get(i).getAsJsonObject();
-                        JsonElement element = versionObj.get("version_type");
-                        // Filter for release versions
-                        if (element != null && element.getAsString().equals("release")) {
-                            firstRelease = versionObj;
-                            break;
-                        }
-                    }
-                    if (firstRelease == null) {
-                        acceptEmpty(consumer);
-                        return;
-                    }
-
-                    JsonElement versionNumElement = firstRelease.get("version_number");
+                    JsonObject release = JsonParser.parseString(responseBody).getAsJsonObject();
+                    JsonElement versionNumElement = release.get("tag_name");
                     if (versionNumElement == null) {
                         acceptEmpty(consumer);
                         return;
                     }
-                    String versionNumber = versionNumElement.getAsString();
+                    String versionNumber = versionNumElement.getAsString().replaceFirst("^[vV]", "");
 
-                    JsonElement idElement = firstRelease.get("id");
-                    if (idElement == null) {
+                    JsonElement urlElement = release.get("html_url");
+                    if (urlElement == null) {
                         acceptEmpty(consumer);
                         return;
                     }
-                    String id = idElement.getAsString();
+                    String releaseUrl = urlElement.getAsString();
 
-                    consumer.accept(Optional.of(versionNumber), Optional.of(id));
+                    consumer.accept(Optional.of(versionNumber), Optional.of(releaseUrl));
                     return;
                 } else {
                     this.plugin.getLogger().info("Cannot look for updates: Request failed with status code " + response.statusCode());

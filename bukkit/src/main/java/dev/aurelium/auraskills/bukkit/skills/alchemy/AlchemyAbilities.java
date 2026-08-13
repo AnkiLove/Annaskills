@@ -14,7 +14,6 @@ import dev.aurelium.auraskills.bukkit.util.AttributeCompat;
 import dev.aurelium.auraskills.bukkit.util.CompatUtil;
 import dev.aurelium.auraskills.bukkit.util.PotionUtil;
 import dev.aurelium.auraskills.common.message.type.AbilityMessage;
-import dev.aurelium.auraskills.common.scheduler.TaskRunnable;
 import dev.aurelium.auraskills.common.user.User;
 import dev.aurelium.auraskills.common.util.text.TextUtil;
 import org.bukkit.Bukkit;
@@ -313,36 +312,27 @@ public class AlchemyAbilities extends BukkitAbilityImpl {
 
     private void wiseEffect() {
         var ability = Abilities.WISE_EFFECT;
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                if (isDisabled(ability)) return;
+        plugin.getScheduler().timerForEachOnlinePlayer(player -> {
+            if (isDisabled(ability)) return;
+            User user = plugin.getUser(player);
 
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    User user = plugin.getUser(player);
-
-                    if (!player.getActivePotionEffects().isEmpty()) {
-                        if (failsChecks(player, ability)) continue;
-                        // Get unique active potion effects
-                        Set<PotionEffectType> uniqueTypesSet = new HashSet<>();
-                        for (PotionEffect potionEffect : player.getActivePotionEffects()) {
-                            uniqueTypesSet.add(potionEffect.getType());
-                        }
-                        int uniqueTypes = uniqueTypesSet.size();
-                        // Apply modifier
-                        double wisdomPerType = getValue(ability, user);
-                        double modifierValue = wisdomPerType * uniqueTypes;
-                        if (modifierValue > 0.0) {
-                            StatModifier modifier = new StatModifier("AbilityModifier-WiseEffect", Stats.WISDOM, modifierValue, Operation.ADD);
-                            user.addStatModifier(modifier, true);
-                        }
-                    } else {
-                        user.removeStatModifier("AbilityModifier-WiseEffect", true);
-                    }
+            if (!player.getActivePotionEffects().isEmpty()) {
+                if (failsChecks(player, ability)) return;
+                Set<PotionEffectType> uniqueTypesSet = new HashSet<>();
+                for (PotionEffect potionEffect : player.getActivePotionEffects()) {
+                    uniqueTypesSet.add(potionEffect.getType());
                 }
+                int uniqueTypes = uniqueTypesSet.size();
+                double wisdomPerType = getValue(ability, user);
+                double modifierValue = wisdomPerType * uniqueTypes;
+                if (modifierValue > 0.0) {
+                    StatModifier modifier = new StatModifier("AbilityModifier-WiseEffect", Stats.WISDOM, modifierValue, Operation.ADD);
+                    user.addStatModifier(modifier, true);
+                }
+            } else {
+                user.removeStatModifier("AbilityModifier-WiseEffect", true);
             }
-        };
-        plugin.getScheduler().timerSync(task, 50, 10 * 50, TimeUnit.MILLISECONDS);
+        }, 50, 10 * 50, TimeUnit.MILLISECONDS);
     }
 
     @EventHandler

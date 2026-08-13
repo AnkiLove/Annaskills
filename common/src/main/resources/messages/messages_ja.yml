@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -476,9 +476,9 @@ commands:
       deleted: Deleted files
       skipped: Skipped files
   profile:
-    skills: "Aurelium Skillsのプロフィール: <gold>{name}:<gray>UUID: <white>{uuid}<gray>スキル:{skill_entries}"
+    skills: "Annaskillsのプロフィール: <gold>{name}:<gray>UUID: <white>{uuid}<gray>スキル:{skill_entries}"
     skill_entry: " <dark_aqua>{skill} <gray>- レベル: <white>{level}<gray>, XP: <white>{xp}"
-    stats: "Aurelium Skillsの統計プロフィール: <gold>{name}:<gray>UUID: <white>{uuid}<gray>統計情報:{stat_entries}"
+    stats: "Annaskillsの統計プロフィール: <gold>{name}:<gray>UUID: <white>{uuid}<gray>統計情報:{stat_entries}"
     stat_entry: " <dark_aqua>{stat} <gray>- 総レベル: <white>{total_level}<gray>, 基本レベル: <white>{base_level}<gray>, 変更されたレベル: <white>{modified_level}"
   rank:
     header: "<aqua><bold>あなたのスキルランキング</bold>"
@@ -513,7 +513,7 @@ commands:
   updateleaderboards:
     already_updating: "<yellow>リーダーボードはすでに更新中です！"
     updated: "<green>リーダーボードが更新されました！"
-  version: "<white>AuraSkillsのバージョンは<aqua>{current_version}<white>です。最新バージョンは<aqua>{latest_version}<white>です"
+  version: "<white>Annaskillsのバージョンは<aqua>{current_version}<white>です。最新バージョンは<aqua>{latest_version}<white>です"
   xp:
     add: "<gray>プレイヤー<gray>{player}<aqua>{amount}{skill}<gray>XPが追加されました"
     set: "<gray>プレイヤー<gray>{player}<aqua>{skill}<gray>XPが{amount}に設定されました"

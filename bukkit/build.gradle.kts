@@ -2,15 +2,13 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     `java-library`
-    id("com.gradleup.shadow") version "8.3.5"
-    id("io.papermc.hangar-publish-plugin") version "0.1.2"
-    id("com.modrinth.minotaur") version "2.+"
+    id("com.gradleup.shadow") version "9.2.2"
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -43,11 +41,10 @@ dependencies {
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
     implementation("de.tr7zw:item-nbt-api:2.16.0")
     implementation("org.bstats:bstats-bukkit:3.0.2")
-    implementation("com.tcoded:FoliaLib:0.5.1")
     compileOnly("net.kyori:adventure-text-minimessage:5.2.0")
     compileOnly("net.kyori:adventure-platform-bukkit:4.4.1")
     compileOnly("org.jetbrains:annotations:24.1.0")
-    compileOnly("org.spigotmc:spigot-api:26.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.2.build.112-stable")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.5") {
         exclude("org.spigotmc", "spigot-api")
@@ -66,8 +63,8 @@ dependencies {
     compileOnly("de.oliver:FancyHolograms:2.8.0")
     compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
     testImplementation(testFixtures(project(":common")))
-    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.108.0")
-    testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v26.2:4.116.1")
+    testImplementation("io.papermc.paper:paper-api:26.2.build.112-stable")
     testImplementation("org.slf4j:slf4j-simple:2.0.17")
     testImplementation("com.mysql:mysql-connector-j:9.3.0")
     testImplementation(platform("org.junit:junit-bom:5.13.2"))
@@ -78,18 +75,17 @@ dependencies {
 }
 
 val compiler = javaToolchains.compilerFor {
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = JavaLanguageVersion.of(25)
 }
 
 val jetbrainsLauncher = javaToolchains.launcherFor {
-    vendor = JvmVendorSpec.JETBRAINS
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = JavaLanguageVersion.of(25)
 }
 
 tasks {
     withType<ShadowJar> {
         val projectVersion: String by project
-        archiveFileName.set("AuraSkills-${projectVersion}.jar")
+        archiveFileName.set("Annaskills-${projectVersion}.jar")
 
         relocate("co.aikar.commands", "dev.aurelium.auraskills.acf")
         relocate("co.aikar.locales", "dev.aurelium.auraskills.locales")
@@ -104,7 +100,6 @@ tasks {
         relocate("net.querz", "dev.aurelium.auraskills.querz")
         relocate("com.archyx.polyglot", "dev.aurelium.auraskills.polyglot")
         relocate("org.atteo.evo.inflector", "dev.aurelium.auraskills.inflector")
-        relocate("com.tcoded.folialib", "dev.aurelium.auraskills.folialib")
 
         exclude("acf-*.properties")
 
@@ -113,7 +108,7 @@ tasks {
 
     register<Copy>("copyJar") {
         val projectVersion: String by project
-        from("build/libs/AuraSkills-${projectVersion}.jar")
+        from("build/libs/Annaskills-${projectVersion}.jar")
         into("../build/libs")
     }
 
@@ -149,72 +144,10 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.2")
     }
 
     test {
         useJUnitPlatform()
     }
-}
-
-val supportedVersions = (project.property("supportedMCVersions") as String).split(",").map { it.trim() }
-
-if (project.hasProperty("hangarApiKey")) {
-    if (!(project.version as String).endsWith("-SNAPSHOT")) {
-        hangarPublish {
-            publications.register("AuraSkills") {
-                val projectVersion = project.version as String
-
-                version.set(projectVersion)
-                id.set("AuraSkills")
-                channel.set("Release")
-                changelog.set(extractChangelog(projectVersion))
-
-                apiKey.set(project.property("hangarApiKey") as String)
-
-                platforms {
-                    paper {
-                        jar.set(tasks.shadowJar.flatMap { it.archiveFile })
-                        platformVersions.set(supportedVersions)
-                    }
-                }
-            }
-        }
-    }
-}
-
-if (project.hasProperty("modrinthToken")) {
-    if (!(project.version as String).endsWith("-SNAPSHOT")) {
-        modrinth {
-            val projectVersion = project.version as String
-
-            token.set(project.property("modrinthToken") as String)
-
-            projectId.set("auraskills")
-            versionNumber.set(projectVersion)
-            versionType.set("release")
-            changelog.set(extractChangelog(projectVersion))
-            uploadFile.set(tasks.shadowJar.flatMap { it.archiveFile }.get())
-            gameVersions.set(supportedVersions)
-            loaders.set(listOf("paper", "purpur", "spigot"))
-        }
-    }
-}
-
-fun extractChangelog(version: String): String {
-    val heading = Regex.escape(version)
-    val cwd = System.getProperty("user.dir")
-    val isInSubmodule: Boolean = project.parent
-        ?.childProjects
-        ?.keys
-        ?.any { cwd.endsWith(it) }
-        ?: false
-    val path = if (isInSubmodule) "../Changelog.md" else "Changelog.md"
-
-    val fullChangelog = File(path).readText()
-    val headingPattern = Regex("## $heading\\R+([\\s\\S]*?)\\R+##\\s", RegexOption.DOT_MATCHES_ALL)
-    val result = headingPattern.find(fullChangelog)
-
-    return result?.groupValues?.get(1)?.trim()
-        ?: ""
 }

@@ -1,4 +1,4 @@
-rootProject.name = "AuraSkills"
+rootProject.name = "Annaskills"
 
 include("api")
 include("bukkit")

@@ -178,7 +178,7 @@ public abstract class ReadiedManaAbility extends ManaAbilityProvider {
 
     private void scheduleUnready(Player player, Locale locale, ManaAbilityData data) {
         int readyDuration = 80;
-        plugin.getScheduler().scheduleSync(() -> {
+        plugin.getScheduler().scheduleAtEntity(player, () -> {
             if (!data.isActivated()) {
                 if (data.isReady()) {
                     data.setReady(false);

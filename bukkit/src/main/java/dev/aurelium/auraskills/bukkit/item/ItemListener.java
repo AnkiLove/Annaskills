@@ -4,9 +4,7 @@ import com.google.common.collect.Sets;
 import dev.aurelium.auraskills.api.stat.ReloadableIdentifier;
 import dev.aurelium.auraskills.bukkit.AuraSkills;
 import dev.aurelium.auraskills.common.config.Option;
-import dev.aurelium.auraskills.common.scheduler.TaskRunnable;
 import dev.aurelium.auraskills.common.user.User;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,18 +29,10 @@ public class ItemListener implements Listener {
     }
 
     public void scheduleTask() {
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    // Gets stored and held items
-                    ItemStack held = player.getInventory().getItemInMainHand();
-
-                    stateManager.changeItemInSlot(plugin.getUser(player), player, held, EquipmentSlot.HAND);
-                }
-            }
-        };
-        plugin.getScheduler().timerSync(task, 0L, plugin.configInt(Option.MODIFIER_ITEM_CHECK_PERIOD) * 50L, TimeUnit.MILLISECONDS);
+        plugin.getScheduler().timerForEachOnlinePlayer(player -> {
+            ItemStack held = player.getInventory().getItemInMainHand();
+            stateManager.changeItemInSlot(plugin.getUser(player), player, held, EquipmentSlot.HAND);
+        }, 0L, plugin.configInt(Option.MODIFIER_ITEM_CHECK_PERIOD) * 50L, TimeUnit.MILLISECONDS);
         scheduleOffHandTask();
     }
 
@@ -81,21 +71,12 @@ public class ItemListener implements Listener {
     }
 
     public void scheduleOffHandTask() {
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                if (!plugin.configBoolean(Option.MODIFIER_ITEM_ENABLE_OFF_HAND)) {
-                    return;
-                }
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    // Gets stored and held items
-                    ItemStack held = player.getInventory().getItemInOffHand();
-
-                    stateManager.changeItemInSlot(plugin.getUser(player), player, held, EquipmentSlot.OFF_HAND);
-                }
+        plugin.getScheduler().timerForEachOnlinePlayer(player -> {
+            if (plugin.configBoolean(Option.MODIFIER_ITEM_ENABLE_OFF_HAND)) {
+                ItemStack held = player.getInventory().getItemInOffHand();
+                stateManager.changeItemInSlot(plugin.getUser(player), player, held, EquipmentSlot.OFF_HAND);
             }
-        };
-        plugin.getScheduler().timerSync(task, 0L, plugin.configInt(Option.MODIFIER_ITEM_CHECK_PERIOD) * 50L, TimeUnit.MILLISECONDS);
+        }, 0L, plugin.configInt(Option.MODIFIER_ITEM_CHECK_PERIOD) * 50L, TimeUnit.MILLISECONDS);
     }
 
 }

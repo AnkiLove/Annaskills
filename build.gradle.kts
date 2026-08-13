@@ -16,7 +16,7 @@ dependencies {
 allprojects {
     group = "dev.aurelium.auraskills"
     version = project.property("projectVersion") as String
-    description = "Advanced skills, stats, and abilties plugin"
+    description = "Paper and Folia compatible skills, stats, and abilities plugin"
 
     apply(plugin = "checkstyle")
 
@@ -41,7 +41,7 @@ jreleaser {
         setActive("ALWAYS")
 
         artifact {
-            setPath("build/libs/AuraSkills-${gradleProject.property("projectVersion")}.jar")
+            setPath("build/libs/Annaskills-${gradleProject.property("projectVersion")}.jar")
         }
     }
 
@@ -81,8 +81,8 @@ jreleaser {
     release {
         github {
             skipRelease = false
-            repoOwner = "Archy-X"
-            name = "AuraSkills"
+            repoOwner = "AnkiLove"
+            name = "Annaskills"
             tagName = gradleProject.property("projectVersion").toString()
             releaseName = gradleProject.property("projectVersion").toString()
             token = (gradleProject.findProperty("jreleaserGithubToken") ?: "").toString()

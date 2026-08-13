@@ -178,7 +178,8 @@ public class SkillsRootCommand extends BaseCommand {
                     e.printStackTrace();
                 }
             }
-            plugin.getScheduler().executeSync(() -> sender.sendMessage(plugin.getPrefix(locale) + plugin.getMsg(CommandMessage.SAVE_SAVED, locale)));
+            plugin.getScheduler().executeAtCommandSender(sender,
+                    () -> sender.sendMessage(plugin.getPrefix(locale) + plugin.getMsg(CommandMessage.SAVE_SAVED, locale)));
         });
     }
 
@@ -196,7 +197,7 @@ public class SkillsRootCommand extends BaseCommand {
                 }
                 double avg = sum / (double) samples;
 
-                plugin.getScheduler().executeSync(() -> {
+                plugin.getScheduler().executeAtCommandSender(sender, () -> {
                     sender.sendMessage(plugin.getPrefix(locale) + plugin.getMsg(CommandMessage.UPDATELEADERBOARDS_UPDATED, locale));
                     if (samples > 1) {
                         sender.sendMessage(plugin.getPrefix(locale) + "Average update time over " + samples + " samples: " + Math.round(avg) + " ms");

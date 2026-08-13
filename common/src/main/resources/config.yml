@@ -1,11 +1,11 @@
 # +----------------------------------------------------------------------------+ #
-# |                           AuraSkills Main Config                           | #
+# |                           Annaskills Main Config                           | #
 # |                                                                            | #
-# |                    Discord: https://discord.gg/Bh2EZfB                     | #
-# |             Source Code: https://github.com/Archy-X/AuraSkills             | #
+# |             Source Code: https://github.com/AnkiLove/Annaskills            | #
+# |        Based on AuraSkills: https://github.com/Archy-X/AuraSkills          | #
 # |      Config Guide: https://wiki.aurelium.dev/auraskills/main-config        | #
 # +----------------------------------------------------------------------------+ #
-# Plugin made by Archy
+# GPL-3.0 adaptation for Paper and Folia 26.2; original project by Archy
 
 sql:
   enabled: false
@@ -281,7 +281,7 @@ menus:
 loot:
   update_loot_tables: true
   directly_to_inventory: false
-check_for_updates: true
+check_for_updates: false
 automatic_backups:
   enabled: true
   minimum_interval_hours: 24

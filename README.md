@@ -1,128 +1,73 @@
-<h1 style="text-align:center;">AuraSkills</h1>
+# Annaskills
 
-<p style="text-align:center;">
-The ultra-versatile Minecraft RPG skills plugin
-</p>
+Annaskills 是面向 Minecraft Paper 与 Folia 26.2 的 RPG 技能插件。项目基于
+[AuraSkills](https://github.com/Archy-X/AuraSkills) 修改，在保留原有技能、属性、能力、
+法力、战利品与菜单体系的基础上，将服务器线程调度迁移到 Paper 官方 Region、Entity、
+Global Region 与 Async Scheduler API。
 
-[![GitHub Release](https://img.shields.io/github/v/release/Archy-X/AuraSkills?style=flat-square)](https://github.com/Archy-X/AuraSkills/releases/latest)
-[![Maven Central Version](https://img.shields.io/maven-central/v/dev.aurelium/auraskills-api-bukkit?style=flat-square&color=%238529F5)](https://central.sonatype.com/artifact/dev.aurelium/auraskills-api-bukkit)
-[![Spiget Downloads](https://img.shields.io/spiget/downloads/81069?style=flat-square)](https://www.spigotmc.org/resources/81069/)
+本项目不是 AuraSkills 官方版本。原项目由 Archy-X / Archy 开发，本适配版本依据
+GNU General Public License v3.0 发布。
 
-<p style="text-align: center;font-weight: bold;">
-  <a href="https://aurelium.dev/auraskills/download">Downloads</a>
-  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="https://wiki.aurelium.dev/auraskills">Wiki</a>
-  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="https://discord.gg/Bh2EZfB">Discord</a>
-</p>
+## 主要特性
 
-## About
+- 同一个 JAR 自动兼容 Paper 26.2 与 Folia 26.2
+- Folia 原生区域调度、实体调度与全局区域调度
+- 玩家循环任务按玩家实体线程分发，避免跨区域访问
+- 延迟区块操作按目标位置所属区域执行
+- 群体伤害、钓鱼、射箭、作物生长、伐木等跨实体路径经过 Folia 安全处理
+- 保留 `auraskills.*` 权限、API 包名和常用集成标识，降低现有生态迁移成本
+- 支持 PlaceholderAPI、Vault、WorldGuard、PacketEvents 等原项目兼容钩子
 
-**AuraSkills** (formerly **Aurelium Skills**) is a Minecraft plugin that adds skills, stats, abilities, and other
-RPG-related features. The plugin is fully configurable and customizable, enabling usage on a wide range of server types.
+## 运行环境
 
-Features include:
+| 项目 | 要求 |
+| --- | --- |
+| Minecraft | 26.2 |
+| 服务端 | Paper 26.2 或 Folia 26.2 |
+| Java | 25 |
+| 插件版本 | 1.0.0 |
 
-- **Skills** - Gain skill XP to level skills through general Minecraft tasks, such as Farming or Mining.
-- **Stats** - Get player buffs like increased health and damage by leveling skills, which can be as independent
-  modifiers and on items.
-- **Abilities** - Skills have passive and active abilities that add gameplay mechanics, plus a full mana system.
-- **Menus** - Players can see everything related to skills in fully-configurable inventory GUIs.
-- **Rewards** - Customize rewards given for leveling skills, such as running commands or giving items.
-- **Loot** - Create custom loot tables for fishing, blocks, and mobs.
+不支持 Spigot/CraftBukkit。Annaskills 使用 Paper 官方调度 API，并由 Paper 在普通单主线程
+环境下提供兼容实现、由 Folia 在区域化线程环境下提供原生实现。
 
-See the [official website](https://aurelium.dev/auraskills) and [wiki](https://wiki.aurelium.dev/auraskills) for a more
-complete list of features. The wiki also contains the list
-of [server requirements](https://wiki.aurelium.dev/auraskills/server-requirements) to run the plugin.
+## 安装
 
-## Building
+1. 使用 Java 25 启动 Paper 26.2 或 Folia 26.2。
+2. 将 `Annaskills-1.0.0.jar` 放入服务器的 `plugins` 目录。
+3. 启动服务器，插件数据将写入 `plugins/Annaskills`。
+4. 按需修改配置后执行 `/skills reload` 或重启服务器。
 
-AuraSkills uses Gradle for dependencies and building.
+从 AuraSkills 迁移时，请先备份原数据。由于插件目录名已经改为 `Annaskills`，需要由服主
+确认并迁移原 `plugins/AuraSkills` 中的配置与数据；权限节点和 API 命名空间继续兼容上游。
 
-#### Compiling from source
+## 构建
 
-First, clone the project (requires Git to be installed):
+Windows：
 
-```
-git clone https://github.com/Archy-X/AuraSkills.git
-cd AuraSkills/
-```
-
-Then build depending on your operating system:
-
-Linux / macOS
-
-```
-./gradlew clean build
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Zulu\zulu-21"
+.\gradlew.bat clean test shadowJar
 ```
 
-Windows
+Gradle 运行时可使用 Java 21，项目 Java Toolchain 会调用 Java 25 编译器。构建产物位于：
 
-```
-.\gradlew.bat clean build
-```
-
-The output jar can be found in the `build/libs` directory.
-
-## API
-
-AuraSkills has an extensive developer API.
-
-Read the full API documentation on the [wiki](https://wiki.aurelium.dev/auraskills/api), or view
-the [Javadocs](https://docs.aurelium.dev/auraskills-api-bukkit/).
-
-Release versions are published to the Maven central repository. Snapshot versions require adding the Sonatype OSS
-repository.
-
-### Maven
-
-```xml
-
-<repository>
-    <id>maven-central-snapshots</id>
-    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-</repository>
+```text
+build/libs/Annaskills-1.0.0.jar
 ```
 
-```xml
+## 项目结构
 
-<dependency>
-    <groupId>dev.aurelium</groupId>
-    <artifactId>auraskills-api-bukkit</artifactId>
-    <version>2.3.5</version>
-    <scope>provided</scope>
-</dependency>
-```
+- `api`：平台无关公开 API
+- `api-bukkit`：Bukkit/Paper API 适配层
+- `common`：技能、用户、存储与通用业务逻辑
+- `bukkit`：Paper/Folia 插件实现及最终 JAR
+- `paper`：Paper 专用能力桥接
 
-### Gradle
+## 上游与许可证
 
-**Groovy DSL:**
+Annaskills 基于 [Archy-X/AuraSkills](https://github.com/Archy-X/AuraSkills)，上游源码采用
+[GPL-3.0](LICENSE.md)。本仓库继续以 GPL-3.0 许可分发，并保留上游版权、提交历史与来源说明。
+详细修改范围见 [NOTICE.md](NOTICE.md)。分发修改后的二进制时，应同时提供对应源码及许可证。
 
-```gradle
-repositories {
-    mavenCentral()
-    maven { url 'https://central.sonatype.com/repository/maven-snapshots/' }
-}
-
-dependencies {
-    compileOnly 'dev.aurelium:auraskills-api-bukkit:2.3.5'
-}
-```
-
-**Kotlin DSL:**
-
-```Gradle Kotlin DSL
-repositories { 
-    mavenCentral()
-    maven("https://central.sonatype.com/repository/maven-snapshots/")
-}
-
-dependencies { 
-    compileOnly("dev.aurelium:auraskills-api-bukkit:2.3.5")
-}
-```
-
-## Contributing
-
-We welcome contributions from the community. Please read the [contributing guide](CONTRIBUTING.md) for instructions
-on setting up a development environment and important guidelines you should know before submitting a pull request.
+AuraSkills 的官方文档仍可作为功能和配置参考，但其中不属于本仓库的商标、网站、下载渠道
+及支持渠道均归原项目所有。

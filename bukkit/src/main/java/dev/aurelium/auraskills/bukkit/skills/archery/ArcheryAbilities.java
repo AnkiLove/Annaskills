@@ -14,6 +14,7 @@ import dev.aurelium.auraskills.bukkit.util.CompatUtil;
 import dev.aurelium.auraskills.bukkit.util.VersionUtils;
 import dev.aurelium.auraskills.common.user.User;
 import dev.aurelium.auraskills.common.util.text.TextUtil;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -233,30 +234,26 @@ public class ArcheryAbilities extends BukkitAbilityImpl {
         var ability = Abilities.RETRIEVAL;
         if (isDisabled(ability)) return;
 
-        if (failsChecks(player, ability)) return;
-
         ItemStack item = getArrowItem(arrow);
         plugin.getScheduler().scheduleAtEntity(arrow, () -> {
             if (!arrow.isValid()) return; // Ignore if the arrow has de-spawned or was picked up
-            if (!arrow.getWorld().equals(player.getWorld())) return;
-
-            double value = getValue(ability, plugin.getUser(player));
-            // Check if arrow is close enough
-            if (arrow.getLocation().distanceSquared(player.getLocation()) > value * value) {
-                return;
-            }
-
-            item.setAmount(1);
-            // Abort if the player doesn't have enough inventory space
+            Location arrowLocation = arrow.getLocation();
             plugin.getScheduler().executeAtEntity(player, (task) -> {
+                if (!player.isValid() || !arrowLocation.getWorld().equals(player.getWorld())) return;
+                if (failsChecks(player, ability)) return;
+
+                double value = getValue(ability, plugin.getUser(player));
+                if (arrowLocation.distanceSquared(player.getLocation()) > value * value) return;
+
+                item.setAmount(1);
                 if (!player.getInventory().addItem(item).isEmpty()) {
                     return;
                 }
+                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.4f, 1.9f);
 
                 plugin.getScheduler().executeAtEntity(arrow, (t2) -> {
+                    if (!arrow.isValid()) return;
                     arrow.getWorld().spawnParticle(CompatUtil.witchParticle(), arrow.getLocation(), 5, 0, 0, 0);
-                    player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.4f, 1.9f);
-
                     arrow.remove();
                 });
             });

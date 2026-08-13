@@ -2,11 +2,13 @@ package dev.aurelium.auraskills.common.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import dev.aurelium.auraskills.common.AuraSkillsPlugin;
+import dev.aurelium.auraskills.common.user.User;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public abstract class Scheduler {
 
@@ -36,6 +38,36 @@ public abstract class Scheduler {
     public abstract Task timerSync(final TaskRunnable runnable, final long delay, final long period, final TimeUnit timeUnit);
 
     public abstract Task timerAsync(final TaskRunnable runnable, final long delay, final long period, final TimeUnit timeUnit);
+
+    public void executeAtUser(final User user, final Runnable runnable) {
+        executeSync(runnable);
+    }
+
+    public Task scheduleAtUser(final User user, final Runnable runnable, final long delay, final TimeUnit timeUnit) {
+        return scheduleSync(runnable, delay, timeUnit);
+    }
+
+    public Task timerAtUser(final User user, final TaskRunnable runnable, final long delay, final long period,
+                            final TimeUnit timeUnit) {
+        return timerSync(runnable, delay, period, timeUnit);
+    }
+
+    public void forEachOnlineUser(final Consumer<User> consumer) {
+        for (User user : plugin.getUserManager().getOnlineUsers()) {
+            executeAtUser(user, () -> consumer.accept(user));
+        }
+    }
+
+    public Task timerForEachOnlineUser(final Consumer<User> consumer, final long delay, final long period,
+                                       final TimeUnit timeUnit) {
+        TaskRunnable dispatcher = new TaskRunnable() {
+            @Override
+            public void run() {
+                forEachOnlineUser(consumer);
+            }
+        };
+        return timerSync(dispatcher, delay, period, timeUnit);
+    }
 
     // Should be run by the implementation when server is shutdown
     public void shutdown() {

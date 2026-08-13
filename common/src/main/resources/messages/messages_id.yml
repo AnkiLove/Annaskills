@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -545,7 +545,7 @@ commands:
   updateleaderboards:
     already_updating: "<yellow>Papan Peringkat Sudah diperbarui!"
     updated: "<green>Papan peringkat diperbarui!"
-  version: "<white>Anda menggunakan AuraSkills <aqua>{current_version}<white>. Versi terbaru adalah <aqua>{latest_version}"
+  version: "<white>Anda menggunakan Annaskills <aqua>{current_version}<white>. Versi terbaru adalah <aqua>{latest_version}"
   xp:
     add: "<gray>Menambahkan <aqua>{amount} {skill} <gray>EXP untuk pemain <gray>{player}"
     set: "<gray>Menyetel <aqua>{skill} <gray>EXP untuk pemain <gray>{player} <gray>ke {amount}"

@@ -133,7 +133,7 @@ public class BukkitItemRegistry implements ItemRegistry {
                 // Add unclaimed item key and amount to player data
                 user.getUnclaimedItems().add(new KeyIntPair(key.toString(), leftoverItem.getAmount()));
                 // Notify player
-                plugin.getScheduler().executeSync(() -> player.sendMessage(plugin.getPrefix(user.getLocale()) + plugin.getMsg(LevelerMessage.UNCLAIMED_ITEM, user.getLocale())));
+                player.sendMessage(plugin.getPrefix(user.getLocale()) + plugin.getMsg(LevelerMessage.UNCLAIMED_ITEM, user.getLocale()));
             }
         });
     }

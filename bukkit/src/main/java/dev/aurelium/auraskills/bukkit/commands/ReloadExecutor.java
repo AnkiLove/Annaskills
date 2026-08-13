@@ -8,9 +8,7 @@ import dev.aurelium.auraskills.bukkit.trait.DamageReductionTrait;
 import dev.aurelium.auraskills.bukkit.trait.HpTrait;
 import dev.aurelium.auraskills.common.message.type.CommandMessage;
 import dev.aurelium.auraskills.common.user.User;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.Locale;
 
@@ -57,10 +55,10 @@ public class ReloadExecutor {
     }
 
     private void reloadPlayers() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        plugin.getScheduler().forEachOnlinePlayer(player -> {
             User user = plugin.getUser(player);
             plugin.getStatManager().recalculateStats(user);
-        }
+        });
     }
 
 }

@@ -1,29 +1,33 @@
 package dev.aurelium.auraskills.bukkit.scheduler;
 
-import com.tcoded.folialib.wrapper.task.WrappedTask;
 import dev.aurelium.auraskills.common.scheduler.Task;
 import dev.aurelium.auraskills.common.scheduler.TaskStatus;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import org.jetbrains.annotations.Nullable;
 
 public class BukkitTaskWrapper implements Task {
 
-    private final WrappedTask bukkitTask;
+    private final ScheduledTask scheduledTask;
 
-    public BukkitTaskWrapper(WrappedTask bukkitTask) {
-        this.bukkitTask = bukkitTask;
+    public BukkitTaskWrapper(@Nullable ScheduledTask scheduledTask) {
+        this.scheduledTask = scheduledTask;
     }
 
     @Override
     public TaskStatus getStatus() {
-        if (bukkitTask.isCancelled()) {
+        if (scheduledTask == null || scheduledTask.isCancelled()) {
             return TaskStatus.STOPPED;
-        } else {
-            return TaskStatus.SCHEDULED;
         }
+        return switch (scheduledTask.getExecutionState()) {
+            case FINISHED, CANCELLED, CANCELLED_RUNNING -> TaskStatus.STOPPED;
+            case IDLE, RUNNING -> TaskStatus.SCHEDULED;
+        };
     }
 
     @Override
     public void cancel() {
-        bukkitTask.cancel();
+        if (scheduledTask != null) {
+            scheduledTask.cancel();
+        }
     }
-
 }

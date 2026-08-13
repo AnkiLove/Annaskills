@@ -6,7 +6,6 @@ import dev.aurelium.auraskills.api.trait.Traits;
 import dev.aurelium.auraskills.api.util.NumberUtil;
 import dev.aurelium.auraskills.bukkit.AuraSkills;
 import dev.aurelium.auraskills.bukkit.util.AttributeCompat;
-import dev.aurelium.auraskills.common.scheduler.TaskRunnable;
 import dev.aurelium.auraskills.common.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.AttributeInstance;
@@ -77,40 +76,22 @@ public class HealthRegenTraits extends TraitImpl {
 
     private void startHungerRegen() {
         Trait trait = Traits.HUNGER_REGEN;
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                if (!trait.isEnabled() || !trait.optionBoolean("use_custom_delay")) return;
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    handleCustomRegen(player, trait, p -> p.getFoodLevel() >= 14 && p.getFoodLevel() < 20, CustomRegenEvent.Reason.HUNGER);
-                }
-            }
-        };
-        plugin.getScheduler().timerSync(task, 0, Traits.HUNGER_REGEN.optionInt("delay", 60) * 50L, TimeUnit.MILLISECONDS);
+        plugin.getScheduler().timerForEachOnlinePlayer(player -> {
+            if (!trait.isEnabled() || !trait.optionBoolean("use_custom_delay")) return;
+            handleCustomRegen(player, trait, p -> p.getFoodLevel() >= 14 && p.getFoodLevel() < 20, CustomRegenEvent.Reason.HUNGER);
+        }, 0, Traits.HUNGER_REGEN.optionInt("delay", 60) * 50L, TimeUnit.MILLISECONDS);
     }
 
     private void startSaturationRegen() {
         Trait trait = Traits.SATURATION_REGEN;
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                if (!trait.isEnabled() || !trait.optionBoolean("use_custom_delay")) return;
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    handleCustomRegen(player, trait, p -> p.getSaturation() >= 0 && p.getFoodLevel() >= 20, CustomRegenEvent.Reason.SATURATION);
-                }
-            }
-        };
-        plugin.getScheduler().timerSync(task, 0, Traits.SATURATION_REGEN.optionInt("delay", 20) * 50L, TimeUnit.MILLISECONDS);
+        plugin.getScheduler().timerForEachOnlinePlayer(player -> {
+            if (!trait.isEnabled() || !trait.optionBoolean("use_custom_delay")) return;
+            handleCustomRegen(player, trait, p -> p.getSaturation() >= 0 && p.getFoodLevel() >= 20, CustomRegenEvent.Reason.SATURATION);
+        }, 0, Traits.SATURATION_REGEN.optionInt("delay", 20) * 50L, TimeUnit.MILLISECONDS);
     }
 
     private void handleCustomRegen(Player player, Trait trait, Function<Player, Boolean> regenCondition, CustomRegenEvent.Reason reason) {
-        if (plugin.getScheduler().isFolia()) {
-            plugin.getScheduler().executeAtEntity(player, (task) -> {
-                handCustomRegenSync(player, trait, regenCondition, reason);
-            });
-        } else {
-            handCustomRegenSync(player, trait, regenCondition, reason);
-        }
+        handCustomRegenSync(player, trait, regenCondition, reason);
     }
 
     private void handCustomRegenSync(Player player, Trait trait, Function<Player, Boolean> regenCondition, CustomRegenEvent.Reason reason) {

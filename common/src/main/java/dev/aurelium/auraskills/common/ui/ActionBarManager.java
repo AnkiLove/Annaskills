@@ -40,90 +40,53 @@ public abstract class ActionBarManager {
     }
 
     public void startTimerCountdown() {
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                if (!plugin.configBoolean(Option.ACTION_BAR_ENABLED)) {
-                    return;
-                }
-
-                for (User user : plugin.getUserManager().getOnlineUsers()) {
-                    UUID uuid = user.getUuid();
-                    Integer time = timer.get(uuid);
-                    if (time != null) {
-                        if (time > 0) {
-                            timer.put(uuid, time - 1);
-                        }
-                    } else {
-                        timer.put(uuid, 0);
-                    }
-                }
+        plugin.getScheduler().timerForEachOnlineUser(user -> {
+            if (!plugin.configBoolean(Option.ACTION_BAR_ENABLED)) {
+                return;
             }
-        };
-        plugin.getScheduler().timerSync(task, 0, 2 * 50L, TimeUnit.MILLISECONDS);
+
+            UUID uuid = user.getUuid();
+            Integer time = timer.get(uuid);
+            if (time != null) {
+                if (time > 0) {
+                    timer.put(uuid, time - 1);
+                }
+            } else {
+                timer.put(uuid, 0);
+            }
+        }, 0, 2 * 50L, TimeUnit.MILLISECONDS);
     }
 
     public void startUpdatingIdleActionBar() {
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                if (!plugin.configBoolean(Option.ACTION_BAR_IDLE) || !plugin.configBoolean(Option.ACTION_BAR_ENABLED)) {
-                    return;
-                }
-                for (User user : plugin.getUserManager().getOnlineUsers()) {
-                    UUID uuid = user.getUuid();
-                    // Check player setting
-                    if (!user.isActionBarEnabled(ActionBarType.IDLE)) {
-                        continue;
-                    }
-                    // Check disabled worlds
-                    if (plugin.getWorldManager().isDisabledWorld(getWorldName(user))) {
-                        continue;
-                    }
-
-                    if (!currentAction.containsKey(uuid)) {
-                        currentAction.put(uuid, 0);
-                    }
-                    if (isGainingXp.contains(uuid) || isPaused.contains(uuid)) {
-                        continue;
-                    }
-
-                    boolean formatLast = plugin.configBoolean(Option.ACTION_BAR_FORMAT_LAST);
-                    Locale locale = user.getLocale();
-
-                    String base;
-                    if (formatLast) {
-                        base = plugin.getMessageProvider().getRaw(ActionBarMessage.IDLE, locale);
-                    } else {
-                        String cache = idleMessageCache.get(locale);
-                        if (cache != null) { // Cache hit
-                            base = cache;
-                        } else { // Cache miss
-                            base = plugin.getMsg(ActionBarMessage.IDLE, locale);
-                            idleMessageCache.put(locale, base);
-                        }
-                    }
-
-                    String message = TextUtil.replace(base,
-                            "{hp}", getHp(user),
-                            "{max_hp}", getMaxHp(user),
-                            "{mana}", getMana(user),
-                            "{max_mana}", getMaxMana(user));
-                    message = replacePlaceholderApi(user, message);
-
-                    if (formatLast) {
-                        message = plugin.getMessageProvider().applyFormatting(message);
-                    }
-
-                    uiProvider.sendActionBar(user, message);
-                }
+        plugin.getScheduler().timerForEachOnlineUser(user -> {
+            if (!plugin.configBoolean(Option.ACTION_BAR_IDLE) || !plugin.configBoolean(Option.ACTION_BAR_ENABLED)) {
+                return;
             }
-        };
-        if (plugin.configBoolean(Option.ACTION_BAR_UPDATE_ASYNC)) {
-            plugin.getScheduler().timerAsync(task, 0, plugin.configInt(Option.ACTION_BAR_UPDATE_PERIOD) * 50L, TimeUnit.MILLISECONDS);
-        } else {
-            plugin.getScheduler().timerSync(task, 0, plugin.configInt(Option.ACTION_BAR_UPDATE_PERIOD) * 50L, TimeUnit.MILLISECONDS);
-        }
+            UUID uuid = user.getUuid();
+            if (!user.isActionBarEnabled(ActionBarType.IDLE)) return;
+            if (plugin.getWorldManager().isDisabledWorld(getWorldName(user))) return;
+
+            currentAction.putIfAbsent(uuid, 0);
+            if (isGainingXp.contains(uuid) || isPaused.contains(uuid)) return;
+
+            boolean formatLast = plugin.configBoolean(Option.ACTION_BAR_FORMAT_LAST);
+            Locale locale = user.getLocale();
+            String base = formatLast
+                    ? plugin.getMessageProvider().getRaw(ActionBarMessage.IDLE, locale)
+                    : idleMessageCache.computeIfAbsent(locale, ignored -> plugin.getMsg(ActionBarMessage.IDLE, locale));
+
+            String message = TextUtil.replace(base,
+                    "{hp}", getHp(user),
+                    "{max_hp}", getMaxHp(user),
+                    "{mana}", getMana(user),
+                    "{max_mana}", getMaxMana(user));
+            message = replacePlaceholderApi(user, message);
+
+            if (formatLast) {
+                message = plugin.getMessageProvider().applyFormatting(message);
+            }
+            uiProvider.sendActionBar(user, message);
+        }, 0, plugin.configInt(Option.ACTION_BAR_UPDATE_PERIOD) * 50L, TimeUnit.MILLISECONDS);
     }
 
     public void sendXpActionBar(User user, Skill skill, double currentXp, double levelXp, double xpGained, int level, boolean maxed, double income) {
@@ -150,7 +113,7 @@ public abstract class ActionBarManager {
         int thisAction = currentAction.getOrDefault(uuid, 0) + 1;
         currentAction.put(uuid, thisAction);
         // Schedule timer task to update action bar
-        plugin.getScheduler().timerSync(
+        plugin.getScheduler().timerAtUser(user,
                 new TaskRunnable() {
                     @Override
                     public void run() {
@@ -174,7 +137,7 @@ public abstract class ActionBarManager {
                     }
                 }, 0, plugin.configInt(Option.ACTION_BAR_UPDATE_PERIOD) * 50L, TimeUnit.MILLISECONDS);
         // Schedule task to stop updating action bar
-        plugin.getScheduler().scheduleSync(() -> {
+        plugin.getScheduler().scheduleAtUser(user, () -> {
             Integer timerNum = timer.get(uuid);
             if (timerNum != null) {
                 if (timerNum.equals(0)) {
@@ -210,7 +173,7 @@ public abstract class ActionBarManager {
             currentAction.put(uuid, 0);
         }
         int thisAction = this.currentAction.get(uuid);
-        plugin.getScheduler().scheduleSync(() -> {
+        plugin.getScheduler().scheduleAtUser(user, () -> {
             Integer actionBarCurrentAction = currentAction.get(uuid);
             if (actionBarCurrentAction != null) {
                 if (thisAction == actionBarCurrentAction) {

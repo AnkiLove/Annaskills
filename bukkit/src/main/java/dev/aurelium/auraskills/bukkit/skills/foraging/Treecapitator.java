@@ -138,6 +138,12 @@ public class Treecapitator extends ReadiedManaAbility {
     }
 
     private void breakBlock(Player player, User user, Block block, TreecapitatorTree tree, AtomicInteger taskCount, Consumer<Integer> onComplete) {
+        // A delayed region task may run after the player crossed a Folia region boundary.
+        // Stop the traversal instead of accessing that player from a foreign region thread.
+        if (!Bukkit.isOwnedByCurrentRegion(player)) {
+            onComplete.accept(0);
+            return;
+        }
         if (tree.getBlocksBroken() > tree.getMaxBlocks()) {
             onComplete.accept(0);
             return;

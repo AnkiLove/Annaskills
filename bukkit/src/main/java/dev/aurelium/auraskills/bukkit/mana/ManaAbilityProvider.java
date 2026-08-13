@@ -93,7 +93,7 @@ public abstract class ManaAbilityProvider implements Listener {
 
         if (duration != 0) {
             //Schedules stop
-            plugin.getScheduler().scheduleSync(() -> stop(player), duration * 50L, TimeUnit.MILLISECONDS);
+            plugin.getScheduler().scheduleAtEntity(player, () -> stop(player), duration * 50L, TimeUnit.MILLISECONDS);
         } else {
             stop(player);
         }

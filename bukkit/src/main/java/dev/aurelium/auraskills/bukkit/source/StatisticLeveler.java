@@ -4,10 +4,8 @@ import dev.aurelium.auraskills.api.source.SkillSource;
 import dev.aurelium.auraskills.api.source.type.StatisticXpSource;
 import dev.aurelium.auraskills.bukkit.AuraSkills;
 import dev.aurelium.auraskills.common.config.Option;
-import dev.aurelium.auraskills.common.scheduler.TaskRunnable;
 import dev.aurelium.auraskills.common.source.SourceTypes;
 import dev.aurelium.auraskills.common.user.User;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
@@ -28,15 +26,11 @@ public class StatisticLeveler extends SourceLeveler {
     }
 
     public void startTracking() {
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    handlePlayer(player);
-                }
-            }
-        };
-        plugin.getScheduler().timerSync(task, 0, plugin.configInt(Option.SOURCE_STATISTIC_GAIN_PERIOD_TICKS) * 50L, TimeUnit.MILLISECONDS);
+        plugin.getScheduler().timerForEachOnlinePlayer(
+                this::handlePlayer,
+                0,
+                plugin.configInt(Option.SOURCE_STATISTIC_GAIN_PERIOD_TICKS) * 50L,
+                TimeUnit.MILLISECONDS);
     }
 
     private void handlePlayer(Player player) {

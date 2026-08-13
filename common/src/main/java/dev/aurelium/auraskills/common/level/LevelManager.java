@@ -192,7 +192,11 @@ public abstract class LevelManager {
         messenger.sendChatMessage();
 
         // Check for multiple level ups in a row after a delay
-        plugin.getScheduler().scheduleSync(() -> checkLevelUp(user, skill), Tick.MS * plugin.configInt(Option.LEVELER_DOUBLE_CHECK_DELAY), TimeUnit.MILLISECONDS);
+        plugin.getScheduler().scheduleAtUser(
+                user,
+                () -> checkLevelUp(user, skill),
+                Tick.MS * plugin.configInt(Option.LEVELER_DOUBLE_CHECK_DELAY),
+                TimeUnit.MILLISECONDS);
     }
 
     public double calculateMultiplier(@NotNull User user, Skill skill) {

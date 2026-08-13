@@ -12,6 +12,7 @@ import dev.aurelium.auraskills.bukkit.trait.GatheringLuckTraits;
 import dev.aurelium.auraskills.common.source.SourceTypes;
 import dev.aurelium.auraskills.common.user.User;
 import org.bukkit.Material;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
@@ -156,11 +157,21 @@ public class BlockLeveler extends SourceLeveler {
 
         Material materialBefore = block.getType();
         if (source.getAfterStates() != null) {
-            plugin.getScheduler().scheduleAtLocation(block.getLocation(), () -> {
+            Location blockLocation = block.getLocation().clone();
+            ItemStack tool = player.getInventory().getItemInMainHand().clone();
+            plugin.getScheduler().scheduleAtLocation(blockLocation, () -> {
                 // Checks that the block after one tick is the same material and matches the after_state/after_states
                 if (materialBefore == block.getType() && matchesStates(block, source.getAfterStates())) {
-                    plugin.getLevelManager().addXp(user, skill, source, source.getXp() * multiplier);
-                    applyBlockLuck(skill, player, user, block, source);
+                    GatheringLuckTraits traitImpl = plugin.getTraitManager().getTraitImpl(GatheringLuckTraits.class);
+                    Set<ItemStack> drops = traitImpl.getUniqueDrops(block, tool);
+                    boolean dropsMineralDirectly = plugin.getAbilityManager().getAbilityImpl(MiningAbilities.class)
+                            .dropsMineralDirectly(block);
+
+                    plugin.getScheduler().executeAtEntity(player, ignored -> {
+                        plugin.getLevelManager().addXp(user, skill, source, source.getXp() * multiplier);
+                        applyBlockLuck(skill, player, user, blockLocation, source, tool, drops,
+                                dropsMineralDirectly);
+                    });
                 }
             }, 50, TimeUnit.MILLISECONDS);
         } else { // Handle sources without after_state/after_states
@@ -232,6 +243,19 @@ public class BlockLeveler extends SourceLeveler {
         Trait blockLuckTrait = traitImpl.getTrait(skill);
         if (blockLuckTrait != null) {
             traitImpl.apply(blockLuckTrait, block, player, user, source, dropFunction.apply(traitImpl));
+        }
+    }
+
+    private void applyBlockLuck(Skill skill, Player player, User user, Location location, XpSource source,
+                                ItemStack tool, Set<ItemStack> drops, boolean dropsMineralDirectly) {
+        if (tool.getEnchantmentLevel(Enchantment.SILK_TOUCH) > 0 && dropsMineralDirectly) {
+            return;
+        }
+
+        GatheringLuckTraits traitImpl = plugin.getTraitManager().getTraitImpl(GatheringLuckTraits.class);
+        Trait blockLuckTrait = traitImpl.getTrait(skill);
+        if (blockLuckTrait != null) {
+            traitImpl.apply(blockLuckTrait, location, player, user, source, drops);
         }
     }
 

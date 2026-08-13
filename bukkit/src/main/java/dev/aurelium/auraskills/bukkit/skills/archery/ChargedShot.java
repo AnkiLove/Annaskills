@@ -11,7 +11,6 @@ import dev.aurelium.auraskills.bukkit.mana.ManaAbilityProvider;
 import dev.aurelium.auraskills.common.ability.AbilityData;
 import dev.aurelium.auraskills.common.mana.ManaAbilityData;
 import dev.aurelium.auraskills.common.message.type.ManaAbilityMessage;
-import dev.aurelium.auraskills.common.scheduler.TaskRunnable;
 import dev.aurelium.auraskills.common.user.User;
 import dev.aurelium.auraskills.common.util.text.TextUtil;
 import org.bukkit.Material;
@@ -92,19 +91,13 @@ public class ChargedShot extends ManaAbilityProvider {
     }
 
     private void tickChargedShotCooldown() {
-        var task = new TaskRunnable() {
-            @Override
-            public void run() {
-                for (User user : plugin.getUserManager().getOnlineUsers()) {
-                    AbilityData abilityData = user.getAbilityData(manaAbility);
-                    int cooldown = abilityData.getInt("toggle_cooldown");
-                    if (cooldown != 0) {
-                        abilityData.setData("toggle_cooldown", cooldown - 1);
-                    }
-                }
+        plugin.getScheduler().timerForEachOnlineUser(user -> {
+            AbilityData abilityData = user.getAbilityData(manaAbility);
+            int cooldown = abilityData.getInt("toggle_cooldown");
+            if (cooldown != 0) {
+                abilityData.setData("toggle_cooldown", cooldown - 1);
             }
-        };
-        plugin.getScheduler().timerSync(task, 3 * 50, 5 * 50, TimeUnit.MILLISECONDS);
+        }, 3 * 50, 5 * 50, TimeUnit.MILLISECONDS);
     }
 
     @EventHandler

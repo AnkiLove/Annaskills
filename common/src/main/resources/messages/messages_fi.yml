@@ -1,5 +1,5 @@
 # ----------------------------
-# AuraSkills message file
+# Annaskills message file
 # ----------------------------
 
 abilities:
@@ -513,7 +513,7 @@ commands:
   updateleaderboards:
     already_updating: "<yellow>Tulostaulu päivitetään jo!"
     updated: "<green>Tulostaulu päivitetty!"
-  version: "<white>Olet Aurelium Skills -versiossa. <aqua> {current_version} <white> Uusin versio on <aqua> {latest_version}"
+  version: "<white>Olet Annaskills-versiossa. <aqua> {current_version} <white> Uusin versio on <aqua> {latest_version}"
   xp:
     add: "<gray>Lisätty <aqua> {amount} {skill} <gray> XP pelaajalle <gray> {player}"
     set: "<gray>Aseta <aqua> {skill} <gray> XP pelaajalle <gray> {player} <gray> {amount}"
