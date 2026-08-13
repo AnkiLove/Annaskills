@@ -25,7 +25,7 @@ GNU General Public License v3.0 发布。
 | Minecraft | 26.2 |
 | 服务端 | Paper 26.2 或 Folia 26.2 |
 | Java | 25 |
-| 插件版本 | 1.0.0 |
+| 插件版本 | 1.0.1 |
 
 不支持 Spigot/CraftBukkit。Annaskills 使用 Paper 官方调度 API，并由 Paper 在普通单主线程
 环境下提供兼容实现、由 Folia 在区域化线程环境下提供原生实现。
@@ -33,7 +33,7 @@ GNU General Public License v3.0 发布。
 ## 安装
 
 1. 使用 Java 25 启动 Paper 26.2 或 Folia 26.2。
-2. 将 `Annaskills-1.0.0.jar` 放入服务器的 `plugins` 目录。
+2. 将 `Annaskills-1.0.1.jar` 放入服务器的 `plugins` 目录。
 3. 启动服务器，插件数据将写入 `plugins/Annaskills`。
 4. 按需修改配置后执行 `/skills reload` 或重启服务器。
 
@@ -52,7 +52,7 @@ $env:JAVA_HOME = "C:\Program Files\Zulu\zulu-21"
 Gradle 运行时可使用 Java 21，项目 Java Toolchain 会调用 Java 25 编译器。构建产物位于：
 
 ```text
-build/libs/Annaskills-1.0.0.jar
+build/libs/Annaskills-1.0.1.jar
 ```
 
 ## 项目结构

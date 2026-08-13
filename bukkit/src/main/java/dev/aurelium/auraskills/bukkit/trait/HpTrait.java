@@ -21,6 +21,8 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -143,34 +145,25 @@ public class HpTrait extends TraitImpl {
     }
 
     @SuppressWarnings("removal")
-    private void setHealth(Player player, User user) {
+    void setHealth(Player player, User user) {
         Trait trait = Traits.HP;
 
         double modifier = user.getBonusTraitLevel(trait);
         AttributeInstance attribute = player.getAttribute(AttributeCompat.maxHealth);
         if (attribute == null) return;
         double originalMaxHealth = attribute.getValue();
-        boolean hasChange = true;
-        // Removes existing modifiers of the same name and check for change
+        List<AttributeModifier> existingModifiers = new ArrayList<>();
         for (AttributeModifier am : attribute.getModifiers()) {
             if (isSkillsHealthModifier(am)) {
-                // Check for any changes, if not, return
-                if (Math.abs(originalMaxHealth - (originalMaxHealth - am.getAmount() + modifier)) <= threshold) {
-                    hasChange = false;
-                }
-                // Removes if it has changed
-                if (hasChange) {
-                    attribute.removeModifier(am);
-                }
+                existingModifiers.add(am);
             }
         }
+
         // Disable health if disabled or in disable world
         if (plugin.getWorldManager().isInDisabledWorld(player.getLocation()) || !trait.isEnabled()) {
             player.setHealthScaled(false);
-            for (AttributeModifier am : attribute.getModifiers()) {
-                if (isSkillsHealthModifier(am)) {
-                    attribute.removeModifier(am);
-                }
+            for (AttributeModifier existing : existingModifiers) {
+                attribute.removeModifier(existing);
             }
             if (player.getHealth() >= originalMaxHealth) {
                 player.setHealth(attribute.getValue());
@@ -181,8 +174,19 @@ public class HpTrait extends TraitImpl {
         if (trait.optionBoolean("force_base_health", false)) {
             attribute.setBaseValue(20.0);
         }
-        // Return if no change
-        if (hasChange) {
+
+        boolean hasCurrentModifier = existingModifiers.size() == 1
+                && isCurrentHealthModifier(existingModifiers.getFirst())
+                && existingModifiers.getFirst().getOperation() == Operation.ADD_NUMBER
+                && Math.abs(existingModifiers.getFirst().getAmount() - modifier) <= threshold;
+
+        // Replace legacy, duplicate, or changed modifiers as one atomic entity-thread update.
+        // This makes repeated reload calls idempotent on Paper, Folia, and Folia forks.
+        if (!hasCurrentModifier) {
+            for (AttributeModifier existing : existingModifiers) {
+                attribute.removeModifier(existing);
+            }
+
             // Applies modifier
             if (VersionUtils.isAtLeastVersion(21)) {
                 NamespacedKey modifierKey = new NamespacedKey(plugin, ATTRIBUTE_KEY);
@@ -205,7 +209,7 @@ public class HpTrait extends TraitImpl {
         applyScaling(player);
     }
 
-    private boolean isSkillsHealthModifier(AttributeModifier am) {
+    boolean isSkillsHealthModifier(AttributeModifier am) {
         if (am.getName().equals("skillsHealth")) {
             return true;
         }
@@ -216,11 +220,19 @@ public class HpTrait extends TraitImpl {
                 // When migrating to 1.21, old attributes are converted to the NamespacedKey minecraft:ATTRIBUTE_ID
                 return true;
             } else {
-                final String attributeNamespace = "auraskills";
-                return namespace.equals(attributeNamespace) && key.equals(ATTRIBUTE_KEY);
+                return key.equals(ATTRIBUTE_KEY)
+                        && (namespace.equals("auraskills") || namespace.equals(plugin.getName().toLowerCase(Locale.ROOT)));
             }
         }
         return false;
+    }
+
+    private boolean isCurrentHealthModifier(AttributeModifier modifier) {
+        if (!VersionUtils.isAtLeastVersion(21)) {
+            return modifier.getUniqueId().equals(ATTRIBUTE_ID);
+        }
+        NamespacedKey key = modifier.getKey();
+        return key.equals(new NamespacedKey(plugin, ATTRIBUTE_KEY));
     }
 
     private void applyScaling(Player player) {

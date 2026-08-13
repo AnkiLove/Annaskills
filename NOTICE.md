@@ -1,6 +1,6 @@
 # 来源与修改声明
 
-Annaskills 1.0.0 是基于 AuraSkills 的非官方适配版本。
+Annaskills 1.0.1 是基于 AuraSkills 的非官方适配版本。
 
 - 上游项目：AuraSkills
 - 上游仓库：https://github.com/Archy-X/AuraSkills
@@ -15,6 +15,8 @@ Annaskills 1.0.0 是基于 AuraSkills 的非官方适配版本。
 3. 移除 FoliaLib 调度封装，直接使用 Paper 官方的全局区域、区域、实体和异步调度器。
 4. 对玩家周期任务、延迟区块任务、命令异步回调及跨实体能力进行 Paper/Folia 双向兼容处理。
 5. 保留原有 API 包、权限节点和兼容标识，尽量兼容 AuraSkills 的扩展生态。
+6. 1.0.1 修复插件改名后生命值属性修饰器命名空间未同步导致的重复注册问题，兼容
+   `annaskills:hp_trait`、上游 `auraskills:hp_trait` 与旧版 UUID 修饰器。
 
 本声明不表示 AuraSkills 原作者为 Annaskills 提供背书或官方支持。完整许可条款见
 `LICENSE.md`；对应源代码应与任何二进制分发版本一同可获得。
